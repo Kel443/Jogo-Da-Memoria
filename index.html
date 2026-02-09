@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Jogo da Memória - KelDesigner Edição</title>
+</head>
+<body>
+
+    <audio id="snd-startup" src="https://www.myinstants.com/media/sounds/windows-7-startup.mp3"></audio>
+    <audio id="snd-error" src="https://www.myinstants.com/media/sounds/windows-7-error.mp3"></audio>
+    <audio id="snd-success" src="https://www.myinstants.com/media/sounds/win7ok.mp3"></audio>
+    <audio id="snd-cheer" src="https://www.myinstants.com/media/sounds/kids-cheering.mp3"></audio>
+    <audio id="musica" src="David_Fesliyan.mp3"></audio>
+    
+    <div id="win-loading">
+        <div class="loader"></div>
+        <h2>Iniciando Windows...</h2>
+    </div>
+
+    <div class="overlay" id="screen-overlay"></div><!-- Para desfoque de fundo -->
+
+    <div class="window dialog" id="dlg-msg"><!-- Caixa de Diálogo -->
+        <div class="title-bar"><span id="dlg-title">Mensagem</span></div><!-- Título dinâmico -->
+        <div class="content"><!-- Conteúdo dinâmico -->
+            <p id="dlg-text" style="font-size: 0.9rem; margin-bottom: 15px;"></p><!-- Texto da mensagem -->
+            <button class="btn" onclick="closeDialog()">OK</button><!-- Botão para fechar a caixa de diálogo -->
+        </div>
+    </div>
+
+    <div class="window active" id="win-login"><!-- Tela de Login -->
+        <div class="title-bar"><span>Bem-vindo</span> <div onclick="toggleMute()" style="cursor:pointer" id="mute-btn">🔊</div></div> 
+        <div class="content">
+            <div id="profile"><img class="img-perfil" src="logo.png" width="60"></div><!-- Área para exibir o perfil do usuário -->
+            <h1 class="H1-JDM">Jogo Da Memória</h1>
+            <input type="text" id="username" placeholder="Nome de Usuário">
+            <input type="password" id="userpass" placeholder="Sua Senha">
+            <button class="btn-logon" style="width: 85%; font-weight: bold;" onclick="userLogon()">Fazer Logon</button>
+            <div style="background: rgba(0,0,0,0.2); margin: 15px 0; padding: 10px; border-radius: 5px; text-align: left;">
+                <p style="font-size: 0.75rem; font-weight: bold;">🏆 TOP 3 RANKING</p>
+                <div id="top3-display"></div>
+            </div>
+            <div style="display:flex; flex-wrap: wrap; justify-content: center;">
+                <button class="btn" onclick="showPlayerList()">Lista de Jogadores</button>
+                <button class="btn" onclick="showScreen('win-stats')">Acessos</button>
+                <button class="btn btn-adm" onclick="showScreen('win-adm-auth')">Painel ADM</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="window" id="win-player-list">
+        <div class="title-bar"><span>Lista de Jogadores</span></div>
+        <div class="content">
+            <div id="full-player-list" style="max-height:200px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:5px; margin-bottom: 15px; text-align: left;"></div>
+            <button class="btn" onclick="showScreen('win-login')">Voltar</button>
+        </div>
+    </div>
+
+    <div class="window" id="win-adm-panel">
+        <div class="title-bar"><span>Painel de Controle Administrador</span></div>
+        <div class="content">
+            <div style="display:flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 10px;">
+                <span>Estatísticas de Acesso</span>
+                <button class="btn" style="padding: 2px 5px;" onclick="resetAccess()">Zerar Acessos</button>
+            </div>
+            <div id="adm-ranking-list" style="max-height:160px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:5px; margin-bottom: 15px;"></div>
+            
+            <button class="btn" onclick="renderAdmList(true)">Marcar para Remover</button>
+            <button class="btn btn-danger" id="btn-del-sel" style="display:none" onclick="deleteSelected()">Apagar Selecionados</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Limpar Tudo</button>
+            <button class="btn" onclick="showScreen('win-login')">Sair</button>
+        </div>
+    </div>
+
+    <div class="window" id="win-adm-auth">
+        <div class="title-bar"><span>Segurança Administrativa</span></div>
+        <div class="content">
+            <input type="email" id="adm-email" placeholder="E-mail">
+            <input type="password" id="adm-pass" placeholder="Senha">
+            <button class="btn btn-adm" onclick="handleAdmLogin()">Acessar</button>
+            <button class="btn" onclick="showScreen('win-adm-recover')">Recuperar/Novo</button>
+            <button class="btn" onclick="showScreen('win-login')">Voltar</button>
+        </div>
+    </div>
+
+    <div class="window" id="win-adm-recover">
+        <div class="title-bar"><span>Recuperação de Sistema</span></div>
+        <div class="content">
+            <p style="font-size:0.75rem; margin-bottom:10px">Use Chave Mestra ou Palavra-Chave</p>
+            <input type="text" id="rec-key" placeholder="Chave Mestra ou Palavra-Chave">
+            <hr style="margin:10px; opacity:0.1">
+            <input type="text" id="new-adm-name" placeholder="Novo Nome">
+            <input type="email" id="new-adm-email" placeholder="Novo E-mail">
+            <input type="password" id="new-adm-pass" placeholder="Nova Senha">
+            <input type="text" id="new-adm-keyword" placeholder="Nova Palavra-Chave">
+            <button class="btn btn-adm" onclick="recoverAdm()">Redefinir Administrador</button>
+            <button class="btn" onclick="showScreen('win-adm-auth')">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="window" id="win-game" style="width: 380px;">
+        <div class="title-bar"><span>ID Sessão: <span id="sess-id"></span></span></div>
+        <div class="content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span>👤 <span id="active-user"></span></span>
+                <span>⏳ <span id="timer">00:00</span></span>
+            </div>
+            <div class="game-grid" id="board"></div>
+            <br>
+            <button class="btn btn-danger" onclick="location.reload()">Fazer Logoff</button>
+        </div>
+    </div>
+
+    <div class="window" id="win-stats">
+        <div class="title-bar"><span>Monitor de Atividade</span></div>
+        <div class="content">
+            <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 5px; font-size: 0.85rem;">
+                <p>Acessos Hoje: <b id="stat-day">0</b></p>
+                <p>Acessos este Mês: <b id="stat-month">0</b></p>
+                <hr style="margin:8px 0; opacity:0.2">
+                <p>Média de tempo/dia: <b id="stat-avg">00:00</b></p>
+                <p>Total de Visitas: <b id="stat-total">0</b></p>
+            </div>
+            <br><button class="btn" onclick="showScreen('win-login')">Voltar</button>
+        </div>
+    </div>
+
+    <footer>
+        <div>&copy; 2024 - <b>Kel Designer</b> | Todos os direitos reservados</div>
+        <div class="social-links">
+            <a href="#" title="Instagram"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram"></a>
+            <a href="#" title="Facebook"><img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook"></a>
+            <a href="https://wa.me/5574988232244?text=Ol%C3%A1%2C%20Kel" title="WhatsApp"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp"></a>
+        </div>
+    </footer>
+  <script src="script.js"></script>
+</body>
+</html>
